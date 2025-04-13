@@ -3523,7 +3523,7 @@ func generateRandomizedSpec(
 	return p, nil
 }
 
-func removeRandomCiphers(r *Prng, s []uint16, maxRemovalProbability float64) []uint16 {
+func removeRandomCiphers(r *prng, s []uint16, maxRemovalProbability float64) []uint16 {
 	// removes elements in place
 	// probability to remove increases for further elements
 	// never remove first cipher
@@ -3544,7 +3544,7 @@ func removeRandomCiphers(r *Prng, s []uint16, maxRemovalProbability float64) []u
 	return s[:sliceLen]
 }
 
-func shuffledCiphers(r *Prng) ([]uint16, error) {
+func shuffledCiphers(r *prng) ([]uint16, error) {
 	ciphers := make(sortableCiphers, len(cipherSuites))
 	perm := r.Perm(len(cipherSuites))
 	for i, suite := range cipherSuites {

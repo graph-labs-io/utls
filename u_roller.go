@@ -12,7 +12,7 @@ type Roller struct {
 	WorkingHelloID      *ClientHelloID
 	TcpDialTimeout      time.Duration
 	TlsHandshakeTimeout time.Duration
-	r                   *Prng
+	r                   *prng
 }
 
 // NewRoller creates Roller object with default range of HelloIDs to cycle through until a
