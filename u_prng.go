@@ -7,7 +7,7 @@
  */
 
 // This code is a pared down version of:
-// https://github.com/Psiphon-Labs/psiphon-tunnel-core/blob/158caea562287284cc3fa5fcd1b3c97b1addf659/psiphon/common/prng/prng.go
+// https://github.com/Psiphon-Labs/psiphon-tunnel-core/blob/158caea562287284cc3fa5fcd1b3c97b1addf659/psiphon/common/Prng/Prng.go
 
 package tls
 
@@ -55,7 +55,7 @@ func newSaltedPRNGSeed(seed *PRNGSeed, salt string) (*PRNGSeed, error) {
 	return saltedSeed, nil
 }
 
-// prng is a seeded, unbiased PRNG based on SHAKE256. that is suitable for use
+// Prng is a seeded, unbiased PRNG based on SHAKE256. that is suitable for use
 // cases such as obfuscation. Seeding is based on crypto/rand.Read.
 //
 // This PRNG is _not_ for security use cases including production cryptographic
@@ -65,14 +65,14 @@ func newSaltedPRNGSeed(seed *PRNGSeed, salt string) (*PRNGSeed, error) {
 //
 // PRNG conforms to io.Reader and math/rand.Source, with additional helper
 // functions.
-type prng struct {
+type Prng struct {
 	rand              *rand.Rand
 	randomStreamMutex sync.Mutex
 	randomStream      sha3.ShakeHash
 }
 
 // NewPRNG generates a seed and creates a PRNG with that seed.
-func NewPRNG() (*prng, error) {
+func NewPRNG() (*Prng, error) {
 	seed, err := NewPRNGSeed()
 	if err != nil {
 		return nil, err
@@ -81,13 +81,13 @@ func NewPRNG() (*prng, error) {
 }
 
 // newPRNGWithSeed initializes a new PRNG using an existing seed.
-func newPRNGWithSeed(seed *PRNGSeed) (*prng, error) {
+func newPRNGWithSeed(seed *PRNGSeed) (*Prng, error) {
 	shake := sha3.NewShake256()
 	_, err := shake.Write(seed[:])
 	if err != nil {
 		return nil, err
 	}
-	p := &prng{
+	p := &Prng{
 		randomStream: shake,
 	}
 	p.rand = rand.New(p)
@@ -96,7 +96,7 @@ func newPRNGWithSeed(seed *PRNGSeed) (*prng, error) {
 
 // newPRNGWithSaltedSeed initializes a new PRNG using a seed derived from an
 // existing seed and a salt with NewSaltedSeed.
-func newPRNGWithSaltedSeed(seed *PRNGSeed, salt string) (*prng, error) {
+func newPRNGWithSaltedSeed(seed *PRNGSeed, salt string) (*Prng, error) {
 	saltedSeed, err := newSaltedPRNGSeed(seed, salt)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func newPRNGWithSaltedSeed(seed *PRNGSeed, salt string) (*prng, error) {
 
 // Read reads random bytes from the PRNG stream into b. Read conforms to
 // io.Reader and always returns len(p), nil.
-func (p *prng) Read(b []byte) (int, error) {
+func (p *Prng) Read(b []byte) (int, error) {
 	p.randomStreamMutex.Lock()
 	defer p.randomStreamMutex.Unlock()
 
@@ -118,13 +118,13 @@ func (p *prng) Read(b []byte) (int, error) {
 }
 
 // Int63 is equivalent to math/read.Int63.
-func (p *prng) Int63() int64 {
+func (p *Prng) Int63() int64 {
 	i := p.Uint64()
 	return int64(i & (1<<63 - 1))
 }
 
 // Int63 is equivalent to math/read.Uint64.
-func (p *prng) Uint64() uint64 {
+func (p *Prng) Uint64() uint64 {
 	var b [8]byte
 	p.Read(b[:])
 	return binary.BigEndian.Uint64(b[:])
@@ -132,7 +132,7 @@ func (p *prng) Uint64() uint64 {
 
 // Seed must exist in order to use a PRNG as a math/rand.Source. This call is
 // not supported and ignored.
-func (p *prng) Seed(_ int64) {
+func (p *Prng) Seed(_ int64) {
 }
 
 // FlipWeightedCoin returns the result of a weighted
@@ -142,7 +142,7 @@ func (p *prng) Seed(_ int64) {
 // weight is 0.0, the outcome is always false.
 //
 // Input weights > 1.0 are treated as 1.0.
-func (p *prng) FlipWeightedCoin(weight float64) bool {
+func (p *Prng) FlipWeightedCoin(weight float64) bool {
 	if weight > 1.0 {
 		weight = 1.0
 	}
@@ -152,7 +152,7 @@ func (p *prng) FlipWeightedCoin(weight float64) bool {
 
 // Intn is equivalent to math/read.Intn, except it returns 0 if n <= 0
 // instead of panicking.
-func (p *prng) Intn(n int) int {
+func (p *Prng) Intn(n int) int {
 	if n <= 0 {
 		return 0
 	}
@@ -161,7 +161,7 @@ func (p *prng) Intn(n int) int {
 
 // Int63n is equivalent to math/read.Int63n, except it returns 0 if n <= 0
 // instead of panicking.
-func (p *prng) Int63n(n int64) int64 {
+func (p *Prng) Int63n(n int64) int64 {
 	if n <= 0 {
 		return 0
 	}
@@ -169,13 +169,13 @@ func (p *prng) Int63n(n int64) int64 {
 }
 
 // Intn is equivalent to math/read.Perm.
-func (p *prng) Perm(n int) []int {
+func (p *Prng) Perm(n int) []int {
 	return p.rand.Perm(n)
 }
 
 // Range selects a random integer in [min, max].
 // If min < 0, min is set to 0. If max < min, min is returned.
-func (p *prng) Range(min, max int) int {
+func (p *Prng) Range(min, max int) int {
 	if min < 0 {
 		min = 0
 	}
