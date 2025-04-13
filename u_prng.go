@@ -71,8 +71,8 @@ type prng struct {
 	randomStream      sha3.ShakeHash
 }
 
-// newPRNG generates a seed and creates a PRNG with that seed.
-func newPRNG() (*prng, error) {
+// NewPRNG generates a seed and creates a PRNG with that seed.
+func NewPRNG() (*prng, error) {
 	seed, err := NewPRNGSeed()
 	if err != nil {
 		return nil, err
